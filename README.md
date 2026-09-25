@@ -1,47 +1,23 @@
-# CCCS-Cost Calculator（Streamlit 版）
+# CCCS–Cost（HONAM-M3冻结模型接入版）
 
-这是根据现有 CCCS-Cost Calculator 页面迁移的 Streamlit 原型，保留两种评估模式、30 个疾病节点、ICD-10 批量识别、演示风险计算、结果分层和主要影响因素展示。
+该版本已替换原型演示公式，接入论文全面版M3正式模型：
 
-> 重要：当前计算逻辑仅复现原网页中的交互演示算法，未接入论文冻结模型，不可用于临床诊疗或费用管理决策。
+- 30个冻结共病节点、45条稳定正向边；
+- 6项拓扑特征、开发集标准化参数和SparsePCA第一成分；
+- HONAM-M3五种子集成模型及各自冻结预处理器；
+- 开发集费用P80高费用界值：32,998.753036元；
+- 预先固定的模型分类评价阈值：0.50；
+- 单次住院录入及CSV/XLSX批量预测。
 
 ## 本地运行
 
-```bash
-python -m venv .venv
-```
-
-Windows：
-
-```bash
-.venv\Scripts\activate
-```
-
-macOS / Linux：
-
-```bash
-source .venv/bin/activate
-```
-
-安装依赖并启动：
-
-```bash
+```powershell
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-浏览器一般会自动打开 `http://localhost:8501`。
+批量入口可读取现有 `建模特征矩阵.xlsx` 的 `特征_标签` 工作表，并自动映射4个带前缀的二值字段。正式模型需要20个M3字段，输出集成概率、0.50分类及五个种子概率。
 
-## 部署到 Streamlit Community Cloud
+复现说明：论文正式分析曾从原始病历表回填32条二值变量缺失记录。若直接上传未回填的旧版 `建模特征矩阵.xlsx`，这些记录会由冻结预处理器按缺失值处理，因此对应概率可能与论文归档预测略有差异；其他记录可直接复现。需要逐行严格复现时，应上传完成该回填后的20字段数据。
 
-1. 将本文件夹上传至 GitHub 仓库。
-2. 在 Streamlit Community Cloud 新建应用。
-3. 选择仓库、分支和入口文件 `app.py`。
-4. 部署后获得 `*.streamlit.app` 网址。
-
-## 文件说明
-
-- `app.py`：Streamlit 页面和交互。
-- `model.py`：疾病数据、ICD-10 规则和演示计算逻辑。
-- `style.css`：按原网页视觉定制的界面样式。
-- `requirements.txt`：部署依赖。
-
+模型仅完成单中心内部测试集验证。训练和验证资料覆盖2011-10至2020-09；超出该时段属于时间外外推。该工具仅供研究复核，不用于临床诊疗、医保支付或资源配置决策。
