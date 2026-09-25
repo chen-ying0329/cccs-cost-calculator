@@ -122,7 +122,7 @@ def result_html(result: dict, selected_count: int) -> str:
             f'style="width:{width:.1f}%"></i></div><b class="{item["direction"]}">{text}</b></div>'
         )
     return f"""
-    <div class="result-head"><div><div class="eyebrow">模型计算结果</div><h2>HONAM-M3个体风险概览</h2></div></div>
+    <div class="result-head"><div><div class="eyebrow">模型计算结果</div><h2>HONAM-M3住院费用概览</h2></div></div>
     <div class="result-grid">
       <article class="risk-panel">
         <div class="panel-label">高费用住院概率</div>
@@ -153,7 +153,7 @@ with st.sidebar:
     st.radio(
         "数据入口",
         ["single", "batch"],
-        format_func=lambda x: "01　单次住院评估" if x == "single" else "02　批量数据预测",
+        format_func=lambda x: "01　住院费用评估" if x == "single" else "02　批量数据预测",
         key="page_mode",
         label_visibility="collapsed",
         on_change=invalidate_result,
@@ -173,14 +173,14 @@ with st.sidebar:
 with st.container(key="topbar"):
     brand_col, pill_col, clear_col = st.columns([8, 1.8, 0.85], vertical_alignment="center")
     with brand_col:
-        st.markdown('<div class="top-brand"><div class="brand-mark">C</div><div><div class="brand-name">CCCS–Cost</div><div class="brand-sub">COPD医疗费用研究工具</div></div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="top-brand"><div class="brand-mark">C</div><div><div class="brand-name">CCCS–Cost</div><div class="brand-sub">COPD医疗费用预测工具</div></div></div>', unsafe_allow_html=True)
     with pill_col:
         st.markdown('<span class="demo-pill">真实数据研究版</span>', unsafe_allow_html=True)
     with clear_col:
         st.button("清空", on_click=clear_all, use_container_width=True)
 
 if st.session_state.page_mode == "batch":
-    st.markdown('<div class="workspace-head"><div class="eyebrow">BATCH INFERENCE</div><h1>批量数据预测</h1><p>可直接读取现有“预测变量矩阵.xlsx”的工作表。</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="workspace-head"><div class="eyebrow">BATCH INFERENCE</div><h1>批量数据预测</h1><p>可直接读取现有“预测变量矩阵.xlsx”的工作表，适用于多名患者或多次住院记录的Excel/CSV，系统逐行计算每条记录的高费用概率，不需要在网页上逐个录入。</p></div>', unsafe_allow_html=True)
     required = list(warm_model().feature_names)
     with st.container(border=True):
         st.markdown("**正式模型所需20个字段**")
@@ -213,7 +213,7 @@ if st.session_state.page_mode == "batch":
             data = output.to_csv(index=False).encode("utf-8-sig")
             st.download_button("下载批量预测结果CSV", data, "HONAM_M3_batch_predictions.csv", "text/csv")
 else:
-    st.markdown('<div class="workspace-head"><div class="eyebrow">FORMAL HONAM-M3</div><h1>单次住院高费用风险评估</h1><p>录入正式M3变量并选择30个冻结共病节点，系统自动计算CCCS与HONAM概率。</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="workspace-head"><div class="eyebrow">FORMAL HONAM-M3</div><h1>医疗费用预测</h1><p>录入正式M3变量并选择30个冻结共病节点，系统自动计算CCCS与HONAM概率。</p></div>', unsafe_allow_html=True)
 
     with st.container(key="basic_card"):
         heading(1, "基本信息与住院时点", "字段定义与正式模型一致")
@@ -269,7 +269,7 @@ else:
         with left:
             st.markdown('<div class="calc-copy"><strong>正式模型推理在本机内存完成</strong><span>不会把患者输入写入项目数据文件</span></div>', unsafe_allow_html=True)
         with right:
-            if st.button("计算HONAM-M3风险　→", type="primary", use_container_width=True):
+            if st.button("计算HONAM-M3模型　→", type="primary", use_container_width=True):
                 st.session_state.show_result = True
 
     if st.session_state.show_result:
