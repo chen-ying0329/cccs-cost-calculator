@@ -122,7 +122,7 @@ def result_html(result: dict, selected_count: int) -> str:
             f'style="width:{width:.1f}%"></i></div><b class="{item["direction"]}">{text}</b></div>'
         )
     return f"""
-    <div class="result-head"><div><div class="eyebrow">模型计算结果</div><h2>HONAM-M3住院费用概览</h2></div></div>
+    <div class="result-head"><div><div class="eyebrow">模型计算结果</div><h2>高费用概率</h2></div></div>
     <div class="result-grid">
       <article class="risk-panel">
         <div class="panel-label">高费用住院概率</div>
