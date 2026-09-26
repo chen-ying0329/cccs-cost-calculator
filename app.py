@@ -267,7 +267,7 @@ else:
     with st.container(key="calculate_bar"):
         left, right = st.columns([4, 1.25], vertical_alignment="center")
         with left:
-            st.markdown('<div class="calc-copy"><strong>正式模型推理在本机内存完成</strong><span>不会把患者输入写入项目数据文件</span></div>', unsafe_allow_html=True)
+            st.markdown('<div class="calc-copy"><span>不会把患者输入写入项目数据文件</span></div>', unsafe_allow_html=True)
         with right:
             if st.button("计算HONAM-M3模型　→", type="primary", use_container_width=True):
                 st.session_state.show_result = True
