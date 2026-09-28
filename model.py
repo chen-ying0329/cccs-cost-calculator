@@ -18,9 +18,9 @@ from formal_model import FrozenHONAMEnsemble
 
 ROOT = Path(__file__).parent
 ASSETS = ROOT / "assets"
-HIGH_COST_AMOUNT = 32998.753036000024
+HIGH_COST_AMOUNT = 33710.3298146649
 CLASSIFICATION_THRESHOLD = 0.50
-MODEL_VERSION = "HONAM-M3 formal 5-seed ensemble / 2026-07-31"
+MODEL_VERSION = "HONAM-M3 temporal validation 5-seed ensemble / 2026-09-27"
 TRAINING_TIME_MIN = 0
 TRAINING_TIME_MAX = 107
 
@@ -78,6 +78,7 @@ DISEASE_BY_ID = {d.id: d for d in DISEASES}
 SERVICES = [
     Service("chemotherapy", "既往化疗", "是否化疗"),
     Service("microbiology", "本次住院做过微生物培养", "是否做过微生物培养"),
+    Service("physical_exam", "本次住院做过物理检查", "是否做过物理检查"),
     Service("pathology", "本次住院做过病理检查", "是否做过病理检查"),
 ]
 
@@ -194,13 +195,9 @@ def cccs_score(node_names: Iterable[str]) -> tuple[float, float, np.ndarray]:
     bridge = float(np.mean([bridge_scores[i] for i in present])) if present else 0.0
     features = np.array([k, strength, density, efficiency, cross_ratio, bridge], dtype=float)
     standardized = (features - np.asarray(params["scaler_mean"])) / np.asarray(params["scaler_scale"])
-    component = np.asarray(params["spca_components"]).reshape(-1)
-    # sklearn SparsePCA.transform projects by ridge regression.  The original
-    # training run used ridge_alpha=0.01, so a simple dot product is not exact.
-    projection_denominator = float(np.dot(component, component) + 0.01)
+    component = np.asarray(params["pca_components"]).reshape(-1)
     raw = float(
-        np.dot(standardized - np.asarray(params["spca_mean"]), component)
-        / projection_denominator
+        np.dot(standardized - np.asarray(params["pca_mean"]), component)
         * float(params["cccs_sign"])
     )
     scaled = float(np.clip((raw - float(params["scale_lo"])) / (float(params["scale_hi"]) - float(params["scale_lo"])) * 100.0, 0.0, 100.0))
@@ -247,12 +244,13 @@ def predict_batch(frame: pd.DataFrame) -> pd.DataFrame:
         "史_吸烟史": "吸烟史",
         "史_化疗": "是否化疗",
         "查_微生物培养": "是否做过微生物培养",
+        "查_物理检查": "是否做过物理检查",
         "查_病理检查": "是否做过病理检查",
     }
     for source, target in aliases.items():
         if target not in frame.columns and source in frame.columns:
             frame[target] = frame[source]
-    for column in ["吸烟史", "是否化疗", "是否做过微生物培养", "是否做过病理检查"]:
+    for column in ["吸烟史", "是否化疗", "是否做过微生物培养", "是否做过物理检查", "是否做过病理检查"]:
         if column in frame.columns:
             frame[column] = frame[column].replace(
                 {"是": 1, "否": 0, "未知": np.nan, "有": 1, "无": 0, True: 1, False: 0}

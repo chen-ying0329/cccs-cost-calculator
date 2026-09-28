@@ -135,14 +135,14 @@ def result_html(result: dict, selected_count: int) -> str:
       <div class="summary-panels">
         <div class="metric-row">
           <article class="metric-card"><span>CCI</span><strong>{result['cci']:.0f}</strong><small>Quan ICD-10</small></article>
-          <article class="metric-card"><span>CCCS</span><strong>{result['cccs']:.2f}</strong><small>冻结SPCA评分</small></article>
+          <article class="metric-card"><span>CCCS</span><strong>{result['cccs']:.2f}</strong><small>冻结普通PCA评分</small></article>
           <article class="metric-card"><span>共病节点</span><strong>{selected_count}</strong><small>30节点网络</small></article>
           <article class="metric-card"><span>高费用界值</span><strong>¥{HIGH_COST_AMOUNT:,.0f}</strong><small>开发集P80</small></article>
         </div>
         <article class="explain-panel"><div class="panel-label">HONAM单变量主效应贡献（不含二阶交互）</div>{''.join(impacts)}</article>
       </div>
     </div>
-    <div class="result-disclaimer"><strong>研究用途</strong><span>该结果来自内部验证模型，不是临床诊断或费用支付规则。页面的0.50是依据现有数据预先固定的分类评价阈值，不代表任一临床场景的最佳决策阈值。</span></div>
+    <div class="result-disclaimer"><strong>研究用途</strong><span>该结果来自单中心时间验证模型，不是临床诊断或费用支付规则。页面的0.50是预先固定的分类评价阈值，不代表任一临床场景的最佳决策阈值。</span></div>
     """
 
 
@@ -165,7 +165,7 @@ with st.sidebar:
         <div class="status-line"><span>结局金额界值</span><b>¥{HIGH_COST_AMOUNT:,.2f}</b></div>
         <div class="status-line"><span>分类阈值</span><b>{CLASSIFICATION_THRESHOLD:.2f}</b></div>
         <div class="status-line"><span>模型版本</span><b>HONAM-M3</b></div>
-        <div class="notice">ⓘ　五种子HONAM集成；CCCS使用30共病节点、45条共病稳定边、标准化参数与SparsePCA载荷。</div>
+        <div class="notice">ⓘ　五种子HONAM集成；CCCS使用30个共病节点、33条稳定正向边、最大边权缩放、Leiden模块与普通PCA载荷。</div>
         """,
         unsafe_allow_html=True,
     )
@@ -183,9 +183,9 @@ if st.session_state.page_mode == "batch":
     st.markdown('<div class="workspace-head"><div class="eyebrow">BATCH INFERENCE</div><h1>批量数据预测</h1><p>可直接读取现有“预测变量矩阵.xlsx”的工作表，适用于多名患者或多次住院记录的Excel/CSV，系统逐行计算每条记录的高费用概率，不需要在网页上逐个录入。</p></div>', unsafe_allow_html=True)
     required = list(warm_model().feature_names)
     with st.container(border=True):
-        st.markdown("**正式模型所需20个字段**")
+        st.markdown("**正式模型所需21个字段**")
         st.code("、".join(required), language=None, wrap_lines=True)
-        st.caption("矩阵中的史_吸烟史、史_化疗、查_微生物培养、查_病理检查等会自动映射为字段。")
+        st.caption("矩阵中的史_吸烟史、史_化疗、查_微生物培养、查_物理检查、查_病理检查等会自动映射为字段。")
         upload = st.file_uploader("上传CSV或XLSX", type=["csv", "xlsx"])
         if upload is not None:
             try:
@@ -217,19 +217,20 @@ else:
 
     with st.container(key="basic_card"):
         heading(1, "基本信息与住院时点", "字段定义与正式模型一致")
-        c1, c2, c3, c4, c5 = st.columns(5)
+        c1, c2, c3, c4, c5, c6 = st.columns(6)
         with c1: st.number_input("年龄", 18, 110, key="age", on_change=invalidate_result)
         with c2: st.number_input("BMI", 8.0, 60.0, step=0.1, key="bmi", on_change=invalidate_result)
-        with c3: st.selectbox("医保类型", ["公费/医疗救助", "其他支付方式", "其他社会保险", "城乡居民医保/新农合", "城镇职工医保", "自费"], key="insurance", on_change=invalidate_result)
-        with c4: st.selectbox("入院途径", ["其他", "外院转入", "急诊", "门诊"], key="admission_route", on_change=invalidate_result)
-        with c5: st.selectbox("入院科室", ["其他内科系统", "呼吸专科(PCCM)", "外科系统", "心血管内科", "急诊", "未知", "老年与综合医学", "重症监护(ICU/CCU)"], key="department", on_change=invalidate_result)
+        with c3: st.selectbox("性别", ["男", "女"], key="sex", on_change=invalidate_result)
+        with c4: st.selectbox("医保类型", ["公费/医疗救助", "其他支付方式", "其他社会保险", "城乡居民医保/新农合", "城镇职工医保", "自费"], key="insurance", on_change=invalidate_result)
+        with c5: st.selectbox("入院途径", ["其他", "外院转入", "急诊", "门诊"], key="admission_route", on_change=invalidate_result)
+        with c6: st.selectbox("入院科室", ["其他内科系统", "呼吸专科(PCCM)", "外科系统", "心血管内科", "急诊", "未知", "老年与综合医学", "重症监护(ICU/CCU)"], key="department", on_change=invalidate_result)
         d1, d2, d3 = st.columns(3)
         with d1: st.date_input("入院日期", key="admission_date", on_change=invalidate_result)
         with d2: st.number_input("住院天数", 1, 365, key="stay_days", on_change=invalidate_result)
         with d3: st.number_input("本次为第几次住院（住院次数）", 1, 99, key="admission_count", on_change=invalidate_result)
         time_trend = 12 * (st.session_state.admission_date.year - 2011) + (st.session_state.admission_date.month - 10)
         if time_trend < 0 or time_trend > TRAINING_TIME_MAX:
-            st.warning(f"该日期对应TimeTrend_month={time_trend}，超出训练数据范围0–{TRAINING_TIME_MAX}（2011-10至2020-09）；属于时间外外推，概率需谨慎解释。")
+            st.warning("该日期超出本研究资料范围（2011-10至2020-09），预测属于时间外外推，需谨慎解释。")
 
     with st.container(key="dynamic_card"):
         heading(2, "生命体征、既往利用与二值变量", "未知值建议按原始病历核实；页面当前要求完整录入")
@@ -243,7 +244,7 @@ else:
         with h2: st.number_input("历史总住院次数", 0, 999, key="history_inpatient", on_change=invalidate_result)
         with h3: st.selectbox("吸烟史", [1, 0], format_func=lambda x: "是" if x == 1 else "否", key="smoking", on_change=invalidate_result)
         with h4: st.number_input("CCI", 0, 30, key="cci", on_change=invalidate_result, help="可由下方ICD-10编码按Quan算法自动计算，也可核实后手动修改。")
-        service_cols = st.columns(3)
+        service_cols = st.columns(4)
         for index, service in enumerate(SERVICES):
             with service_cols[index]:
                 st.selectbox(service.label, [0, 1], format_func=lambda x: "否" if x == 0 else "是", key=f"service_{service.id}", on_change=invalidate_result)
@@ -277,6 +278,7 @@ else:
         features = {
             "年龄": st.session_state.age,
             "BMI": st.session_state.bmi,
+            "性别": st.session_state.sex,
             "医保类型": st.session_state.insurance,
             "住院次数": st.session_state.admission_count,
             "吸烟史": st.session_state.smoking,
@@ -290,8 +292,8 @@ else:
             "入院科室": st.session_state.department,
             "入院途径": st.session_state.admission_route,
             "是否做过微生物培养": binary["是否做过微生物培养"],
+            "是否做过物理检查": binary["是否做过物理检查"],
             "是否做过病理检查": binary["是否做过病理检查"],
-            "TimeTrend_month": time_trend,
             "住院天数": st.session_state.stay_days,
             "CCI": st.session_state.cci,
         }
@@ -316,4 +318,4 @@ else:
             ])
             st.download_button("下载本次结果文本", text, "HONAM_M3_result.txt", "text/plain")
 
-st.markdown('<div class="page-footer"><b>CCCS–Cost Calculator</b><span>Frozen research model · Internal validation only</span></div>', unsafe_allow_html=True)
+st.markdown('<div class="page-footer"><b>CCCS–Cost Calculator</b><span>Frozen research model · Temporal validation</span></div>', unsafe_allow_html=True)
