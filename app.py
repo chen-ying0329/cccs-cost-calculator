@@ -149,6 +149,7 @@ def result_html(result: dict, selected_count: int) -> str:
 initialize_state()
 
 with st.sidebar:
+    st.page_link("pages/English_Version.py", label="English version", icon="🌐")
     st.markdown('<div class="eyebrow">评估方式</div><div class="sidebar-title">选择数据入口</div>', unsafe_allow_html=True)
     st.radio(
         "数据入口",
