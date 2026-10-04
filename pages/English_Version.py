@@ -187,7 +187,10 @@ def result_html(result: dict, selected_count: int) -> str:
 initialize_state()
 
 with st.sidebar:
-    st.page_link("app.py", label="中文版 / Chinese version", icon="↩️")
+    st.markdown(
+        '<a class="language-link" href="/" target="_self">↩️&nbsp;&nbsp;中文版 / Chinese version</a>',
+        unsafe_allow_html=True,
+    )
     st.markdown('<div class="eyebrow">ASSESSMENT MODE</div><div class="sidebar-title">Select an input mode</div>', unsafe_allow_html=True)
     st.radio(
         "Input mode",
