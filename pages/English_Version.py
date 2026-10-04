@@ -23,12 +23,13 @@ from model import (
 
 
 ROOT = Path(__file__).parent.parent
-st.set_page_config(
-    page_title="CCCS–Cost | COPD cost prediction",
-    page_icon="C",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+if not globals().get("CCCS_ROUTED", False):
+    st.set_page_config(
+        page_title="CCCS–Cost | COPD cost prediction",
+        page_icon="C",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
 st.markdown(f"<style>{(ROOT / 'style.css').read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
 
 
@@ -188,7 +189,7 @@ initialize_state()
 
 with st.sidebar:
     st.markdown(
-        '<a class="language-link" href="/" target="_self">↩️&nbsp;&nbsp;中文版 / Chinese version</a>',
+        '<a class="language-link" href="/?lang=zh" target="_self">↩️&nbsp;&nbsp;中文版 / Chinese version</a>',
         unsafe_allow_html=True,
     )
     st.markdown('<div class="eyebrow">ASSESSMENT MODE</div><div class="sidebar-title">Select an input mode</div>', unsafe_allow_html=True)

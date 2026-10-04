@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 from html import escape
 from pathlib import Path
+import runpy
 
 import pandas as pd
 import streamlit as st
@@ -23,12 +24,22 @@ from model import (
 
 
 ROOT = Path(__file__).parent
+LANGUAGE = str(st.query_params.get("lang", "zh")).lower()
 st.set_page_config(
-    page_title="CCCS–Cost｜COPD医疗费用预测",
+    page_title=("CCCS–Cost | COPD cost prediction" if LANGUAGE == "en" else "CCCS–Cost｜COPD医疗费用预测"),
     page_icon="C",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+if LANGUAGE == "en":
+    runpy.run_path(
+        str(ROOT / "pages" / "English_Version.py"),
+        init_globals={"CCCS_ROUTED": True},
+        run_name="__main__",
+    )
+    st.stop()
+
 st.markdown(f"<style>{(ROOT / 'style.css').read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
 
 
@@ -150,7 +161,7 @@ initialize_state()
 
 with st.sidebar:
     st.markdown(
-        '<a class="language-link" href="/English_Version" target="_self">🌐&nbsp;&nbsp;English version</a>',
+        '<a class="language-link" href="/?lang=en" target="_self">🌐&nbsp;&nbsp;English version</a>',
         unsafe_allow_html=True,
     )
     st.markdown('<div class="eyebrow">评估方式</div><div class="sidebar-title">选择数据入口</div>', unsafe_allow_html=True)
