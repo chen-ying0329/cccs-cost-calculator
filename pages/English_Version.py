@@ -304,7 +304,8 @@ else:
         columns = st.columns(3)
         for index, disease in enumerate(filtered):
             with columns[index % 3]:
-                st.checkbox(f"**{DISEASE_EN.get(disease.id, disease.name)}**  \n{GROUP_EN.get(disease.group, disease.group)}  `{disease.code}`", key=f"disease_{disease.id}", on_change=invalidate_result)
+                code_label = disease.code.replace("等", " etc.")
+                st.checkbox(f"**{DISEASE_EN.get(disease.id, disease.name)}**  \n{GROUP_EN.get(disease.group, disease.group)}  `{code_label}`", key=f"disease_{disease.id}", on_change=invalidate_result)
         st.markdown(f'<div class="selection-count">Selected {len(selected_disease_ids())} / 30 frozen nodes</div>', unsafe_allow_html=True)
 
     with st.container(key="calculate_bar"):
