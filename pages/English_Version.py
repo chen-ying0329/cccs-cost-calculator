@@ -42,7 +42,14 @@ FEATURE_EN = {
     "是否做过病理检查": "Pathology examination", "住院天数": "Length of stay", "CCI": "CCI", "CCCS": "CCCS",
     "TimeTrend_month": "Time trend"
 }
-RISK_EN = {"高风险": "High risk", "中风险": "Intermediate risk", "低风险": "Low risk"}
+RISK_EN = {
+    "模型阳性": "Model positive",
+    "概率较高": "Higher probability",
+    "概率较低": "Lower probability",
+    "高风险": "High risk",
+    "中风险": "Intermediate risk",
+    "低风险": "Low risk",
+}
 SEX_EN = {"男": "Male", "女": "Female"}
 INSURANCE_EN = {"公费/医疗救助": "Public funding / medical assistance", "其他支付方式": "Other payment",
     "其他社会保险": "Other social insurance", "城乡居民医保/新农合": "Resident insurance / NCMS",
